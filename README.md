@@ -7,7 +7,7 @@
 ### About
 Skriva is a simple Conversations fork designed to be usable by people, who never used a XMPP client before.
 Therefore, certain features like PGP encryption or channel discovery have been removed or not inherited.
-Additionally the default server (skriva.me) is not S2S compliant.
+Additionally the default server (skriva.me) is not S2S compliant, however it is not enforced in this modalso.
 
 For more informations be sure to check Skriva [F.A.Q](https://blog.skriva.me/f-a-q/).
 
