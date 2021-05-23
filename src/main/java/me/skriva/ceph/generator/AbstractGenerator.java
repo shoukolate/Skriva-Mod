@@ -27,8 +27,10 @@ public abstract class AbstractGenerator {
 			Content.Version.FT_3.getNamespace(),
 			Content.Version.FT_4.getNamespace(),
 			Content.Version.FT_5.getNamespace(),
-			"urn:xmpp:jingle:transports:s5b:1",
-			"urn:xmpp:jingle:transports:ibb:1",
+			Namespace.JINGLE_TRANSPORTS_S5B,
+			Namespace.JINGLE_TRANSPORTS_IBB,
+			Namespace.JINGLE_ENCRYPTED_TRANSPORT,
+			Namespace.JINGLE_ENCRYPTED_TRANSPORT_OMEMO,
 			"http://jabber.org/protocol/muc",
 			"jabber:x:conference",
 			Namespace.OOB,
@@ -70,7 +72,7 @@ public abstract class AbstractGenerator {
 	}
 
 	String getIdentityName() {
-		return mXmppConnectionService.getString(R.string.app_name) + ' ' + getIdentityVersion();
+		return mXmppConnectionService.getString(R.string.app_name);
 	}
 
 	public String getUserAgent() {

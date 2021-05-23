@@ -50,6 +50,7 @@ public class Conversation extends AbstractEntity implements Blockable, Comparabl
 
 	public static final String ATTRIBUTE_MUTED_TILL = "muted_till";
 	public static final String ATTRIBUTE_ALWAYS_NOTIFY = "always_notify";
+	public static final String ATTRIBUTE_PUSH_NODE = "push_node";
 	public static final String ATTRIBUTE_LAST_CLEAR_HISTORY = "last_clear_history";
 	static final String ATTRIBUTE_MUC_PASSWORD = "muc_password";
 	private static final String ATTRIBUTE_NEXT_MESSAGE = "next_message";
@@ -272,7 +273,7 @@ public class Conversation extends AbstractEntity implements Blockable, Comparabl
 		final ArrayList<Message> results = new ArrayList<>();
 		synchronized (this.messages) {
 			for (Message message : this.messages) {
-				if (message.getType() != Message.TYPE_IMAGE && message.getStatus() == Message.STATUS_UNSEND) {
+				if ((message.getType() == Message.TYPE_TEXT || message.hasFileOnRemoteHost()) && message.getStatus() == Message.STATUS_UNSEND) {
 					results.add(message);
 				}
 			}

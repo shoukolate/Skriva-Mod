@@ -24,5 +24,12 @@ public final class Namespace {
 	public static final String BOOKMARKS_CONVERSION = "urn:xmpp:bookmarks-conversion:0";
 	public static final String BOOKMARKS = "storage:bookmarks";
 	public static final String AVATAR_CONVERSION = "urn:xmpp:pep-vcard-conversion:0";
+	public static final String JINGLE_TRANSPORTS_S5B = "urn:xmpp:jingle:transports:s5b:1";
+	public static final String JINGLE_TRANSPORTS_IBB = "urn:xmpp:jingle:transports:ibb:1";
 	public static final String MESSAGE_ATTACHING = "urn:xmpp:message-attaching:0";
+	public static final String PING = "urn:xmpp:ping";
+	public static final String PUSH = "urn:xmpp:push:0";
+	public static final String COMMANDS = "http://jabber.org/protocol/commands";
+	public static final String JINGLE_ENCRYPTED_TRANSPORT = "urn:xmpp:jingle:jet:0";
+	public static final String JINGLE_ENCRYPTED_TRANSPORT_OMEMO = "urn:xmpp:jingle:jet-omemo:0";
 }

@@ -24,9 +24,11 @@ public final class Config {
     public static final Jid BUG_REPORTS = Jid.of("bugs@skriva.me");
 
 
-    public static final String DOMAIN_LOCK = "skriva.me"; //only allow account creation for this domain
+    public static final String DOMAIN_LOCK = null; //only allow account creation for this domain
     public static final String MAGIC_CREATE_DOMAIN = "skriva.me";
     public static final boolean DISALLOW_REGISTRATION_IN_UI = false; //hide the register checkbox
+
+    public static final String CHANNEL_DISCOVERY = "https://search.jabbercat.org";
 
     public static final boolean USE_RANDOM_RESOURCE_ON_EVERY_BIND = false;
 
@@ -83,6 +85,7 @@ public final class Config {
 
     public static final boolean DISABLE_PROXY_LOOKUP = false; //useful to debug ibb
     public static final boolean DISABLE_HTTP_UPLOAD = false;
+    public static final boolean USE_DIRECT_JINGLE_CANDIDATES = false;
     public static final boolean EXTENDED_SM_LOGGING = false; // log stanza counts
     public static final boolean BACKGROUND_STANZA_LOGGING = false; //log all stanzas that were received while the app is in background
     public static final boolean RESET_ATTEMPT_COUNT_ON_NETWORK_CHANGE = true; //setting to true might increase power consumption
@@ -94,6 +97,7 @@ public final class Config {
     public static final boolean ONLY_INTERNAL_STORAGE = false; //use internal storage instead of sdcard to save attachments
 
     public static final boolean IGNORE_ID_REWRITE_IN_MUC = true;
+    public static final boolean MUC_LEAVE_BEFORE_JOIN = true;
 
     public static final long MAM_MAX_CATCHUP = MILLISECONDS_IN_DAY * 5;
     public static final int MAM_MAX_MESSAGES = 750;

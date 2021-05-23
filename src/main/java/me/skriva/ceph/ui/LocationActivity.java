@@ -23,12 +23,12 @@ import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.config.IConfigurationProvider;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 
-import java.io.File;
 import java.io.IOException;
 
 import me.skriva.ceph.BuildConfig;
@@ -72,14 +72,6 @@ public abstract class LocationActivity extends ActionBarActivity implements Loca
 		clearMarkers();
 	}
 
-	private XYTileSource tileSource() {
-		return new XYTileSource("OpenStreetMap",
-				0, 19, 256, ".png", new String[] {
-				"https://a.tile.openstreetmap.org/",
-				"https://b.tile.openstreetmap.org/",
-				"https://c.tile.openstreetmap.org/" },"© OpenStreetMap contributors");
-	}
-
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -102,24 +94,13 @@ public abstract class LocationActivity extends ActionBarActivity implements Loca
 
 		final IConfigurationProvider config = Configuration.getInstance();
 		config.load(ctx, getPreferences());
-		config.setUserAgentValue(BuildConfig.APPLICATION_ID + "_" + BuildConfig.VERSION_CODE);
+		config.setUserAgentValue(BuildConfig.APPLICATION_ID + "/" + BuildConfig.VERSION_CODE);
 		if (QuickConversationsService.isConversations() && getBooleanPreference()) {
 			try {
 				config.setHttpProxy(HttpConnectionManager.getProxy());
 			} catch (IOException e) {
 				throw new RuntimeException("Unable to configure proxy");
 			}
-		}
-
-		final File f = new File(ctx.getCacheDir() + "/tiles");
-		try {
-			//noinspection ResultOfMethodCallIgnored
-			f.mkdirs();
-		} catch (final SecurityException ignored) {
-		}
-		if (f.exists() && f.isDirectory() && f.canRead() && f.canWrite()) {
-			Log.d(Config.LOGTAG, "Using tile cache at: " + f.getAbsolutePath());
-			config.setOsmdroidTileCache(f.getAbsoluteFile());
 		}
 	}
 
@@ -149,10 +130,10 @@ public abstract class LocationActivity extends ActionBarActivity implements Loca
 
 	void setupMapView(MapView mapView, final GeoPoint pos) {
 		map = mapView;
-		map.setTileSource(tileSource());
-		map.setBuiltInZoomControls(false);
+		map.setTileSource(TileSourceFactory.MAPNIK);
+		map.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.NEVER);
 		map.setMultiTouchControls(true);
-		map.setTilesScaledToDpi(true);
+		map.setTilesScaledToDpi(false);
 		mapController = map.getController();
 		mapController.setZoom(Config.Map.INITIAL_ZOOM_LEVEL);
 		mapController.setCenter(pos);
@@ -249,7 +230,7 @@ public abstract class LocationActivity extends ActionBarActivity implements Loca
 		requestLocationUpdates();
 		updateLocationMarkers();
 		updateUi();
-		map.setTileSource(tileSource());
+		map.setTileSource(TileSourceFactory.MAPNIK);
 		map.setTilesScaledToDpi(true);
 
 		if (mapAtInitialLoc()) {

@@ -22,6 +22,7 @@ import me.skriva.ceph.crypto.axolotl.XmppAxolotlMessage;
 import me.skriva.ceph.entities.Account;
 import me.skriva.ceph.entities.Contact;
 import me.skriva.ceph.entities.Conversation;
+import me.skriva.ceph.entities.Conversational;
 import me.skriva.ceph.entities.Message;
 import me.skriva.ceph.entities.MucOptions;
 import me.skriva.ceph.entities.ReadByMarker;
@@ -124,7 +125,8 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                     service.reportBrokenSessionException(e, postpone);
                     return new Message(conversation, "", Message.ENCRYPTION_AXOLOTL_FAILED, status);
                 } else {
-                    Log.d(Config.LOGTAG,"ignoring broken session exception because checkForDuplicase failed");
+                    Log.d(Config.LOGTAG,"ignoring broken session exception because checkForDuplicates failed");
+                    //TODO should be still emit a failed message?
                     return null;
                 }
             } catch (NotEncryptedForThisDeviceException e) {
@@ -258,6 +260,17 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                         packet.getId(),
                         Message.STATUS_SEND_FAILED,
                         extractErrorMessage(packet));
+                final Element error = packet.findChild("error");
+                final boolean pingWorthyError = error != null && (error.hasChild("not-acceptable") || error.hasChild("remote-server-timeout") || error.hasChild("remote-server-not-found"));
+                if (pingWorthyError) {
+                    Conversation conversation = mXmppConnectionService.find(account,from);
+                    if (conversation != null && conversation.getMode() == Conversational.MODE_MULTI) {
+                        if (conversation.getMucOptions().online()) {
+                            Log.d(Config.LOGTAG,account.getJid().asBareJid()+": received ping worthy error for seemingly online muc at "+from);
+                            mXmppConnectionService.mucSelfPingAndRejoin(conversation);
+                        }
+                    }
+                }
             }
             return true;
         }
@@ -433,6 +446,7 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                     origin = from;
                 }
 
+                //TODO either or is probably fine?
                 final boolean checkedForDuplicates = serverMsgId != null && remoteMsgId != null && !conversation.possibleDuplicate(serverMsgId, remoteMsgId);
 
                 if (origin != null) {
@@ -520,7 +534,8 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
                     final boolean fingerprintsMatch = replacedMessage.getFingerprint() == null
                             || replacedMessage.getFingerprint().equals(message.getFingerprint());
                     final boolean trueCountersMatch = replacedMessage.getTrueCounterpart() != null
-                            && replacedMessage.getTrueCounterpart().equals(message.getTrueCounterpart());
+                            && message.getTrueCounterpart() != null
+                            && replacedMessage.getTrueCounterpart().asBareJid().equals(message.getTrueCounterpart().asBareJid());
                     final boolean mucUserMatches = query == null && replacedMessage.sameMucUser(message); //can not be checked when using mam
                     final boolean duplicate = conversation.hasDuplicateMessage(message);
                     if (fingerprintsMatch && (trueCountersMatch || !conversationMultiMode || mucUserMatches) && !duplicate) {
@@ -856,7 +871,10 @@ public class MessageParser extends AbstractParser implements OnMessagePacketRece
         boolean execute(Account account) {
             if (jid != null) {
                 Conversation conversation = mXmppConnectionService.findOrCreateConversation(account, jid, true, false);
-                if (!conversation.getMucOptions().online()) {
+                if (conversation.getMucOptions().online()) {
+                    Log.d(Config.LOGTAG,account.getJid().asBareJid()+": received invite to "+jid+" but muc is considered to be online");
+                    mXmppConnectionService.mucSelfPingAndRejoin(conversation);
+                } else {
                     conversation.getMucOptions().setPassword(password);
                     mXmppConnectionService.databaseBackend.updateConversation(conversation);
                     mXmppConnectionService.joinMuc(conversation, inviter != null && inviter.mutualPresenceSubscription());
